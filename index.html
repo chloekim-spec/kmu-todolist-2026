@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KMEETSU × Ulta | To-Do Dashboard</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --ink:       #151922;
+  --ink-2:     #3d4452;
+  --ink-3:     #6b7385;
+  --accent:    #3478f6;
+  --accent-soft: rgba(52,120,246,.10);
+  --accent-mid:  rgba(52,120,246,.22);
+  --green:     #17b26a;
+  --green-soft:rgba(23,178,106,.10);
+  --orange:    #f59e0b;
+  --orange-soft:rgba(245,158,11,.12);
+  --red:       #ef4444;
+  --red-soft:  rgba(239,68,68,.10);
+  --purple:    #8b5cf6;
+  --purple-soft:rgba(139,92,246,.12);
+  --gray:      #767676;
+  --border:    rgba(0,0,0,.07);
+  --surface:   rgba(255,255,255,.82);
+  --surface-2: rgba(255,255,255,.64);
+  --shadow-xs: 0 2px 10px rgba(30,41,59,.06);
+  --shadow-sm: 0 6px 26px rgba(30,41,59,.10);
+  --shadow:    0 18px 60px rgba(30,41,59,.14);
+  --shadow-blue: 0 8px 28px rgba(52,120,246,.22);
+  --r-sm: 12px;
+  --r-md: 18px;
+  --r-lg: 26px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.6;
+  min-height: 100vh;
+  background:
+    radial-gradient(1100px 560px at 8% -8%, rgba(52,120,246,.10), transparent 60%),
+    radial-gradient(900px 520px at 100% 0%, rgba(139,92,246,.08), transparent 55%),
+    #f4f6fb;
+  padding-bottom: 80px;
+}
+
+/* ─── HEADER ─── */
+.header {
+  position: sticky; top:0; z-index: 40;
+  display:flex; align-items:center; justify-content:space-between;
+  gap: 18px; padding: 14px 26px;
+  background: rgba(255,255,255,.78); backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--border);
+}
+.header-left { display:flex; align-items:center; gap: 12px; }
+.header-logo-mark {
+  width: 38px; height: 38px; border-radius: 12px; flex-shrink:0;
+  background: linear-gradient(135deg, var(--accent), #7c6ad0);
+  color:#fff; font-weight:800; font-size:16px; letter-spacing:-.5px;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow: var(--shadow-blue);
+}
+.header-logo { font-weight: 800; font-size: 15px; letter-spacing:-.2px; }
+.header-sub { font-size: 11px; color: var(--ink-3); margin-top: 1px; }
+.header-right { display:flex; align-items:center; gap: 10px; }
+.header-manager { font-size: 11px; font-weight: 700; color: var(--accent); background: var(--accent-soft); padding: 5px 11px; border-radius: 100px; }
+.header-date { font-size: 11px; color: var(--ink-3); }
+.export-btn {
+  display:flex; align-items:center; gap:6px; padding: 9px 16px;
+  background: var(--ink); color: #fff; border:none; border-radius: 100px;
+  font-size: 12px; font-weight: 700; cursor:pointer; font-family:inherit;
+  box-shadow: var(--shadow-sm); transition: transform .15s;
+}
+.export-btn:hover { transform: translateY(-1px); }
+
+/* ─── WRAP ─── */
+.wrap { max-width: 1040px; margin: 0 auto; padding: 22px 26px 0; }
+
+/* ─── OVERVIEW STRIP ─── */
+.overview {
+  display:grid; grid-template-columns: 1.3fr 1fr 1fr 1.6fr; gap: 14px;
+  margin-bottom: 22px;
+}
+.ov-card {
+  background: var(--surface); border:1px solid var(--border); border-radius: var(--r-md);
+  padding: 16px 18px; box-shadow: var(--shadow-xs); backdrop-filter: blur(10px);
+}
+.ov-label { font-size: 10.5px; font-weight: 700; color: var(--ink-3); text-transform:uppercase; letter-spacing:.4px; margin-bottom: 8px; }
+.ov-big { font-size: 26px; font-weight: 800; letter-spacing:-.5px; }
+.ov-big span { font-size: 14px; font-weight: 700; color: var(--ink-3); }
+.ov-bar-track { height: 8px; background: rgba(0,0,0,.06); border-radius: 100px; overflow:hidden; margin-top: 10px; }
+.ov-bar-fill { height:100%; background: linear-gradient(90deg, var(--accent), #7c6ad0); border-radius:100px; transition: width .3s; }
+.ov-dday-list { display:flex; flex-direction:column; gap: 7px; }
+.ov-dday-row { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:11.5px; }
+.ov-dday-tag { font-weight: 800; font-size: 10.5px; padding: 3px 9px; border-radius: 100px; flex-shrink:0; }
+.dday-urgent { background: var(--red-soft); color: var(--red); }
+.dday-soon   { background: var(--orange-soft); color: var(--orange); }
+.dday-ok     { background: var(--green-soft); color: var(--green); }
+.ov-dday-txt { color: var(--ink-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ov-owner-row { display:flex; gap: 10px; flex-wrap:wrap; }
+.ov-owner-chip { display:flex; align-items:center; gap:6px; font-size:11px; color: var(--ink-2); background: rgba(0,0,0,.03); padding: 6px 10px; border-radius:100px; }
+.ov-owner-dot { width:8px; height:8px; border-radius:50%; }
+
+/* ─── FILTER BAR ─── */
+.filterbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap: 10px; margin-bottom: 16px; }
+.filter-group { display:flex; gap:6px; }
+.filter-btn {
+  padding: 7px 14px; border-radius: 100px; border: 1px solid var(--border);
+  background: rgba(255,255,255,.7); color: var(--ink-2); font-size: 11.5px; font-weight:600;
+  cursor:pointer; font-family:inherit; transition: all .15s;
+}
+.filter-btn.active { background: var(--ink); color:#fff; border-color: var(--ink); }
+.legend-note { font-size: 10.5px; color: var(--ink-3); }
+
+/* ─── SECTION CARD ─── */
+.section {
+  background: var(--surface); border:1px solid var(--border); border-radius: var(--r-lg);
+  box-shadow: var(--shadow-xs); margin-bottom: 18px; overflow:hidden; backdrop-filter: blur(10px);
+}
+.section-head {
+  display:flex; align-items:center; gap:14px; padding: 18px 22px;
+  border-bottom: 1px solid var(--border); cursor:pointer;
+}
+.sec-icon { font-size: 20px; width:42px; height:42px; border-radius:13px; background: var(--accent-soft);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.sec-titles { flex:1; min-width:0; }
+.sec-title { font-size: 15px; font-weight: 800; letter-spacing:-.2px; display:flex; align-items:center; gap:8px; }
+.sec-badge { font-size: 9.5px; font-weight: 700; padding: 3px 9px; border-radius:100px; background: var(--accent-soft); color: var(--accent); letter-spacing:.2px; }
+.sec-period { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+.sec-progress-wrap { display:flex; align-items:center; gap:10px; width: 160px; flex-shrink:0; }
+.sec-bar-track { flex:1; height:7px; background: rgba(0,0,0,.06); border-radius:100px; overflow:hidden; }
+.sec-bar-fill { height:100%; background: var(--accent); border-radius:100px; transition:width .3s; }
+.sec-pct { font-size: 11px; font-weight: 700; color: var(--ink-2); width: 32px; text-align:right; }
+.sec-chevron { color: var(--ink-3); transition: transform .2s; font-size:12px; }
+.section.collapsed .sec-chevron { transform: rotate(-90deg); }
+.section.collapsed .sec-body { display:none; }
+
+.sec-body { padding: 6px 22px 18px; }
+.grp-label {
+  font-size: 10.5px; font-weight: 800; color: var(--purple); text-transform:uppercase; letter-spacing:.5px;
+  margin: 14px 0 6px; padding-left: 2px;
+}
+.grp-label:first-child { margin-top: 10px; }
+
+ul.tasklist { list-style:none; }
+ul.tasklist li {
+  display:flex; align-items:flex-start; gap: 16px; padding: 11px 10px; border-radius: 10px;
+  cursor:pointer; transition: background .12s;
+}
+ul.tasklist li:hover { background: rgba(0,0,0,.025); }
+ul.tasklist li.done { opacity: .55; }
+ul.tasklist li.done .task-text { text-decoration: line-through; text-decoration-color: var(--ink-3); }
+ul.tasklist li.branch { margin-left: 26px; }
+.chk {
+  width: 18px; height: 18px; border: 2px solid rgba(0,0,0,.18); border-radius: 6px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; margin-top: 2px; font-size: 11px;
+  transition: all .12s; background: #fff; color:#fff;
+}
+li.done .chk { background: var(--green); border-color: var(--green); }
+.task-main { flex:1; min-width:0; padding-top: 1px; }
+.task-text {
+  font-size: 12.6px; color: var(--ink); line-height:1.55; outline:none; border-radius:6px; padding: 1px 4px; margin-left:-4px;
+}
+.task-text.edited { background: var(--accent-soft); }
+.task-branch-tag { font-size: 10.5px; font-weight: 800; color: var(--purple); margin-right: 5px; }
+.task-note { font-size: 11px; color: var(--ink-3); margin-top: 4px; line-height:1.5; max-width: 480px; }
+.task-meta {
+  display:flex; flex-direction:row; align-items:center; gap:10px; flex-shrink:0;
+  flex-wrap:nowrap; white-space:nowrap; padding-top: 2px;
+}
+.owner-pill {
+  font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius:100px; cursor:pointer;
+  border: none; font-family: inherit; transition: transform .1s;
+}
+.owner-pill:hover { transform: translateY(-1px); }
+.owner-Chloe { background: var(--accent-soft); color: var(--accent); }
+.owner-Ara   { background: var(--purple-soft); color: var(--purple); }
+.owner-Wendy { background: var(--green-soft); color: #0d8f56; }
+.owner-TBD   { background: rgba(0,0,0,.06); color: var(--ink-3); }
+.owner-group { display:flex; align-items:center; gap:5px; flex-wrap:nowrap; justify-content:flex-end; }
+.owner-add {
+  background: transparent; border: 1.4px dashed rgba(0,0,0,.22); color: var(--ink-3);
+  font-size: 10.5px; font-weight: 700; padding: 2.5px 8px; border-radius:100px; cursor:pointer;
+  font-family: inherit; line-height:1.5;
+}
+.owner-add:hover { border-color: var(--accent); color: var(--accent); }
+.tag-pill {
+  font-size: 10.5px; font-weight: 700; padding: 2.5px 9px; border-radius:100px;
+  border: 1.4px solid transparent; font-family: inherit; line-height:1.5;
+}
+.tag-BB    { background: rgba(15,118,110,.12); color:#0f766e; border-color: rgba(15,118,110,.22); }
+.tag-Jaden { background: rgba(184,127,0,.12); color:#b87d00; border-color: rgba(184,127,0,.22); }
+.due-tag {
+  font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius:100px; cursor:text;
+  background: rgba(0,0,0,.045); color: var(--ink-2);
+}
+.due-tag.dday-urgent { background: var(--red-soft); color: var(--red); }
+.due-tag.dday-soon { background: var(--orange-soft); color: var(--orange); }
+.due-tag.edited { outline: 1px dashed var(--accent); }
+.memo-btn {
+  width:22px; height:22px; border-radius:50%; border:1.4px dashed rgba(0,0,0,.22); background:transparent;
+  color: var(--ink-3); font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; padding:0; line-height:1; font-family:inherit; transition: all .12s;
+}
+.memo-btn:hover { border-color: var(--accent); color: var(--accent); }
+.memo-btn.has-memo { border-style:solid; border-color: var(--accent-mid); background: var(--accent-soft); color: var(--accent); }
+.edit-inline-input {
+  font-family: inherit; font-size: inherit; border: 1px solid var(--accent); border-radius:6px;
+  padding: 3px 6px; outline:none; width: 100%; background:#fff;
+}
+
+/* ─── EXPORT MODAL ─── */
+.export-modal-overlay {
+  position: fixed; inset:0; background: rgba(15,18,26,.45); backdrop-filter: blur(4px);
+  display:flex; align-items:center; justify-content:center; z-index: 100;
+  opacity:0; pointer-events:none; transition: opacity .18s;
+}
+.export-modal-overlay.open { opacity:1; pointer-events:all; }
+.export-modal {
+  width: 560px; max-width: 92vw; max-height: 78vh; background:#fff; border-radius: var(--r-lg);
+  box-shadow: var(--shadow); display:flex; flex-direction:column; overflow:hidden;
+}
+.export-modal-header { padding: 20px 24px 14px; border-bottom: 1px solid var(--border); }
+.export-modal-title { font-size: 15px; font-weight: 800; }
+.export-modal-sub { font-size: 11.5px; color: var(--ink-3); margin-top: 4px; line-height:1.5; }
+#export-list { padding: 14px 24px; overflow-y:auto; flex:1; }
+.export-empty { color: var(--ink-3); font-size: 12.5px; text-align:center; padding: 30px 0; }
+.export-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
+.export-item:last-child { border-bottom:none; }
+.export-item-label { font-size: 11.5px; font-weight: 700; margin-bottom: 5px; }
+.export-item-row { display:flex; align-items:center; gap:8px; font-size: 11.5px; }
+.export-item-tag { font-size: 9.5px; font-weight: 800; padding: 2px 7px; border-radius: 100px; flex-shrink:0; }
+.export-tag-before { background: var(--red-soft); color: var(--red); }
+.export-tag-after { background: var(--green-soft); color: var(--green); }
+.export-val { color: var(--ink-2); }
+.export-actions { display:flex; justify-content:flex-end; gap: 10px; padding: 14px 24px; border-top: 1px solid var(--border); }
+.export-close-btn { padding: 9px 16px; border-radius: 100px; border: 1px solid var(--border); background:#fff; font-family:inherit; font-size:12px; font-weight:700; cursor:pointer; }
+.export-copy-btn { padding: 9px 18px; border-radius: 100px; border:none; background: var(--ink); color:#fff; font-family:inherit; font-size:12px; font-weight:700; cursor:pointer; }
+
+.footer-note { text-align:center; font-size: 10.5px; color: var(--ink-3); padding: 24px 0 10px; }
+
+/* ─── VIEW TABS ─── */
+.view-tabs { display:flex; gap:6px; margin-bottom: 16px; }
+.view-tab {
+  padding: 9px 18px; border-radius: 100px; border: 1px solid var(--border);
+  background: rgba(255,255,255,.7); color: var(--ink-2); font-size: 12.5px; font-weight:700;
+  cursor:pointer; font-family:inherit; transition: all .15s;
+}
+.view-tab.active { background: var(--ink); color:#fff; border-color: var(--ink); }
+
+/* ─── CALENDAR VIEW ─── */
+.cal-legend { display:flex; flex-wrap:wrap; gap: 10px 16px; margin-bottom: 14px; padding: 12px 16px; background: var(--surface); border:1px solid var(--border); border-radius: var(--r-md); }
+.cal-legend-item { display:flex; align-items:center; gap:6px; font-size: 11px; color: var(--ink-2); }
+.cal-legend-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.cal-toolbar { display:flex; align-items:center; justify-content:center; gap:18px; margin-bottom: 14px; }
+.cal-nav-btn {
+  width:32px; height:32px; border-radius:50%; border:1px solid var(--border); background:#fff;
+  cursor:pointer; font-size:13px; color: var(--ink-2); font-family:inherit;
+}
+.cal-nav-btn:hover { background: var(--accent-soft); color: var(--accent); border-color: var(--accent-mid); }
+.cal-month-label { font-size: 16px; font-weight: 800; letter-spacing:-.2px; min-width: 110px; text-align:center; }
+.cal-weekdays { display:grid; grid-template-columns: repeat(7,1fr); gap:6px; margin-bottom:6px; }
+.cal-weekdays div { text-align:center; font-size: 10.5px; font-weight:700; color: var(--ink-3); padding: 4px 0; }
+.cal-grid { display:grid; grid-template-columns: repeat(7,1fr); gap:6px; margin-bottom: 18px; }
+.cal-cell {
+  min-height: 96px; border:1px solid var(--border); border-radius: 12px; padding: 7px 6px;
+  background: var(--surface); display:flex; flex-direction:column; gap:4px; overflow:hidden;
+}
+.cal-cell-empty { border-color: transparent; background: transparent; }
+.cal-cell-today { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.cal-daynum { font-size: 11px; font-weight: 700; color: var(--ink-3); }
+.cal-cell-today .cal-daynum { color: var(--accent); }
+.cal-chips { display:flex; flex-direction:column; gap:3px; }
+.cal-chip {
+  font-size: 10px; font-weight:700; padding: 2.5px 6px; border-radius:6px; cursor:pointer;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.4;
+}
+.cal-chip-done { opacity:.5; text-decoration: line-through; }
+.cal-more { font-size: 10px; font-weight:700; color: var(--ink-3); cursor:pointer; padding: 1px 6px; }
+.cal-more:hover { color: var(--accent); }
+.cal-nodate { margin-top: 4px; }
+.cal-nodate-title { font-size: 11.5px; font-weight: 800; color: var(--ink-3); margin-bottom: 8px; }
+.cal-nodate-list { display:flex; flex-wrap:wrap; gap: 8px; }
+.cal-chip-block { padding: 6px 12px; border-radius:100px; display:flex; align-items:center; gap:6px; }
+.cal-chip-due { font-weight:600; opacity:.75; }
+
+/* ─── CALENDAR DETAIL MODAL ─── */
+.cal-modal-overlay {
+  position: fixed; inset:0; background: rgba(15,18,26,.45); backdrop-filter: blur(4px);
+  display:flex; align-items:center; justify-content:center; z-index: 100;
+  opacity:0; pointer-events:none; transition: opacity .18s;
+}
+.cal-modal-overlay.open { opacity:1; pointer-events:all; }
+.cal-modal {
+  width: 420px; max-width: 90vw; max-height: 78vh; overflow-y:auto; background:#fff; border-radius: var(--r-lg);
+  box-shadow: var(--shadow); padding: 22px 24px;
+}
+.cal-modal-header { display:flex; align-items:center; gap:8px; margin-bottom: 12px; }
+.cal-modal-sec-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+.cal-modal-sec-name { font-size: 11.5px; font-weight: 700; color: var(--ink-3); }
+.cal-modal-text { font-size: 14px; font-weight: 700; line-height:1.5; margin-bottom: 14px; }
+.cal-modal-row { font-size: 12px; color: var(--ink-2); margin-bottom: 8px; line-height:1.5; }
+.cal-modal-check { display:flex; align-items:center; gap:7px; font-size: 12.5px; font-weight:700; cursor:pointer; }
+.cal-modal-check input { width:16px; height:16px; cursor:pointer; }
+.cal-modal-actions { display:flex; justify-content:flex-end; margin-top: 14px; }
+.cal-daylist { display:flex; flex-direction:column; gap: 10px; margin-bottom: 4px; }
+.cal-daylist-item { display:flex; align-items:center; gap:8px; font-size: 12px; }
+.cal-daylist-done { opacity:.5; text-decoration:line-through; }
+
+/* ─── 메모 모달 (cal-modal 스타일 재사용) ─── */
+.memo-textarea {
+  width:100%; min-height:120px; font-family:inherit; font-size:12.5px; line-height:1.6; padding:10px 12px;
+  border:1px solid var(--border); border-radius:10px; resize:vertical; outline:none; margin-bottom:6px; color: var(--ink);
+}
+.memo-textarea:focus { border-color: var(--accent); }
+.memo-view { font-size:12.5px; line-height:1.7; color: var(--ink-2); white-space:pre-wrap; word-break:break-word; margin-bottom: 6px; min-height: 40px; }
+.memo-link { color: var(--accent); text-decoration: underline; word-break: break-all; }
+.memo-empty { color: var(--ink-3); font-style: italic; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-left">
+    <div class="header-logo-mark">K</div>
+    <div>
+      <div class="header-logo">KMEETSU × Ulta Beauty — To-Do</div>
+      <div class="header-sub">전체 마케팅 프로그램 실행 체크리스트</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="export-btn" onclick="openExportModal()">✏️ 변경사항 보기</button>
+    <span class="header-manager">Managed by Chloe Kim</span>
+    <span class="header-date" id="header-date"></span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="overview">
+    <div class="ov-card">
+      <div class="ov-label">전체 진행률</div>
+      <div class="ov-big" id="ov-total-txt">0<span>%</span></div>
+      <div class="ov-bar-track"><div class="ov-bar-fill" id="ov-total-bar" style="width:0%"></div></div>
+    </div>
+    <div class="ov-card">
+      <div class="ov-label">완료 / 전체</div>
+      <div class="ov-big" id="ov-count-txt">0 <span>/ 0</span></div>
+    </div>
+    <div class="ov-card">
+      <div class="ov-label">담당자별 항목</div>
+      <div class="ov-owner-row" id="ov-owner-row"></div>
+    </div>
+    <div class="ov-card">
+      <div class="ov-label">다가오는 마감</div>
+      <div class="ov-dday-list" id="ov-dday-list"></div>
+    </div>
+  </div>
+
+  <!-- 캘린더 뷰 기능은 코드는 그대로 두고 화면에서만 숨김 처리(2026-08-31, Chloe 요청).
+       다시 노출하려면 이 div의 style="display:none"만 지우면 됨(로직/데이터 변경 없음). -->
+  <div class="view-tabs" id="view-tabs" style="display:none">
+    <button class="view-tab active" data-view="list">📋 리스트 뷰</button>
+    <button class="view-tab" data-view="calendar">🗓️ 캘린더 뷰</button>
+  </div>
+
+  <div class="filterbar">
+    <div class="filter-group" id="filter-status">
+      <button class="filter-btn active" data-v="all">전체</button>
+      <button class="filter-btn" data-v="todo">진행중</button>
+      <button class="filter-btn" data-v="done">완료</button>
+    </div>
+    <div class="filter-group" id="filter-owner">
+      <button class="filter-btn active" data-v="all">담당자 전체</button>
+      <button class="filter-btn" data-v="Chloe">Chloe</button>
+      <button class="filter-btn" data-v="Ara">Ara</button>
+      <button class="filter-btn" data-v="Wendy">Wendy</button>
+    </div>
+    <div class="legend-note">체크 = 완료 처리 · 텍스트/마감일은 더블클릭, 담당자는 이름 클릭 시 제외 · "+"로 추가 (복수 지정 가능)</div>
+  </div>
+
+  <div id="view-list">
+    <div id="sections"></div>
+  </div>
+
+  <div id="view-calendar" style="display:none">
+    <div class="cal-legend" id="cal-legend"></div>
+    <div class="cal-toolbar">
+      <button class="cal-nav-btn" onclick="calPrevMonth()">◀</button>
+      <div class="cal-month-label" id="cal-month-label"></div>
+      <button class="cal-nav-btn" onclick="calNextMonth()">▶</button>
+    </div>
+    <div class="cal-weekdays"><div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div></div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="cal-nodate" id="cal-nodate"></div>
+  </div>
+
+  <div class="footer-note">KMEETSU × Ulta Beauty 마케팅 프로그램 · 지난 미팅 및 프로젝트 논의 내용 기준 To-Do · 수정 후 우측 상단 "변경사항 보기"로 로그를 복사해 전달하면 원본 파일에 반영됩니다.</div>
+</div>
+
+<div class="cal-modal-overlay" id="cal-modal-overlay" onclick="closeCalModalOnOverlay(event)">
+  <div class="cal-modal" id="cal-modal-content"></div>
+</div>
+
+<div class="cal-modal-overlay" id="memo-modal-overlay" onclick="closeMemoModalOnOverlay(event)">
+  <div class="cal-modal" id="memo-modal-content"></div>
+</div>
+
+<div class="export-modal-overlay" id="export-modal-overlay" onclick="closeExportOnOverlay(event)">
+  <div class="export-modal">
+    <div class="export-modal-header">
+      <div class="export-modal-title">✏️ 변경사항 요약</div>
+      <div class="export-modal-sub">체크·수정하신 내역입니다. 복사 후 Claude에게 붙여넣으면 파일에 영구 반영됩니다.</div>
+    </div>
+    <div id="export-list"></div>
+    <div class="export-actions">
+      <button class="export-close-btn" onclick="closeExportModal()">닫기</button>
+      <button class="export-copy-btn" onclick="copyExportText()">📋 클립보드 복사</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// DATA — 소스 오브 트루스 (여기가 바뀌면 아래 로직이 자동 반영)
+// ══════════════════════════════════════════════
+const SECTIONS = [
+  { key:'s1', icon:'🎓', title:'Virtual Training', badge:'이번 달 · 9/30', period:'현 상황: 브랜드·제품 선정 완료', color:'#3478f6' },
+  { key:'s2', icon:'🤝', title:'Brand Pitching', badge:'이번 달 · 9월 내', period:'9월 내 전 브랜드 피칭·계약 완료 목표', color:'#8b5cf6' },
+  { key:'s_field', icon:'🏪', title:'Field Team', badge:'파일럿 11월-1월 · 정식 3월', period:'파일럿(11월-1월, 3개월) 선행 후 정식 방문(Wk7-9, 3월, 13일) 진행 — 268개 매장 · 13일', color:'#0d9488' },
+  { key:'s3', icon:'🌸', title:'Q1 K-Beauty Week 준비', badge:'Wk 7-9 · 2027년 3월', period:'얼타 K-Beauty Week 프로모션 캘린더 연동', color:'#ec4899' },
+  { key:'s_msr', icon:'📊', title:'측정 & 성과 리포팅', badge:'Q1 연동', period:'날짜는 Q1 시작일(2027년 3월경, 미확정) 기준 역산 — 실제 날짜 확정 시 업데이트 필요', color:'#f59e0b' },
+  { key:'s4', icon:'✈️', title:'UB Collective Trip 샘플링', badge:'2027년 1월', period:'Dylan 협업 — 샘플링 협찬 준비', color:'#06b6d4' },
+  { key:'s5', icon:'🇰🇷', title:'VIP Korea Trip', badge:'2027년 · 일정 TBD', period:'메인 스폰서십 포지션 확보 목표', color:'#ef4444' },
+  { key:'s6', icon:'🔁', title:'Q2–Q4 반복 체계화', badge:'상시', period:'Q1 실행 결과를 템플릿화해 반복 적용', color:'#64748b' },
+];
+
+// due: 'YYYY-MM-DD' → D-day 자동 계산 / 그 외 문자열은 그대로 표시
+const TASKS = [
+  // ── Section 1 : Virtual Training ──
+  { id:'s1-1', sec:'s1', text:'트레이닝 구조 / 아젠다 설계', owner:['Chloe'], due:'2026-09-11' },
+  { id:'s1-2', sec:'s1', text:'발표 포맷 아이디에이션 — 누가, 어떻게 보여줄지', owner:['Chloe','Wendy','Ara'], due:'2026-09-11' },
+  { id:'s1-3', sec:'s1', text:'트레이닝 자료(콘텐츠) 제작', owner:['Chloe'], due:'2026-09-15' },
+  { id:'s1-4', sec:'s1', text:'인쇄물 제작이 타임라인 내(9/11 IFS 도착) 가능한지 확인', owner:['Chloe'], due:'2026-09-05', note:'가능 여부에 따라 아래 A/B 중 하나로 진행' },
+  { id:'s1-5', sec:'s1', text:'인쇄물 제작 → IFS 도착', owner:['Chloe'], due:'2026-09-11', branch:true, branchTag:'A · 가능한 경우' },
+  { id:'s1-6', sec:'s1', text:'QR코드 제작 — 발표 중 스캔해서 자료 확인하도록 유도', owner:['Chloe'], due:'2026-09-30', branch:true, branchTag:'B · 불가한 경우' },
+  { id:'s1-7', sec:'s1', text:'매장 일정에 맞춰 제품 발송', owner:['Ara'], due:'2026-09-11' },
+  { id:'s1-8', sec:'s1', text:'9/30 버추얼 트레이닝 진행', owner:['Chloe','Ara','Wendy'], due:'2026-09-30' },
+
+  // ── Section 2 : Brand Pitching ──
+  { id:'s2-1', sec:'s2', text:'피칭 대상 브랜드 리스트 확정', owner:[], due:'2026-08-28', done:true },
+  { id:'s2-2', sec:'s2', text:'브랜드별 피칭 자료 준비', owner:['Wendy'], due:'9/4-7' },
+  { id:'s2-3', sec:'s2', text:'피칭 미팅 스케줄링', owner:['Wendy'], due:'2026-09-03' },
+  { id:'s2-4', sec:'s2', text:'계약 조건 협상', owner:['Wendy'], due:'9/4-18' },
+  { id:'s2-5', sec:'s2', text:'9월 내 전체 계약 완료', owner:['Wendy'], due:'2026-09-30' },
+  { id:'s2-6', sec:'s2', text:'브랜드 티어별 가격 확정', owner:['Wendy'], due:'2026-09-03', tag:['Jaden'] },
+
+  // ── Section FIELD : Field Team — 268개 매장 · 13일 (파일럿 11-1월 + 정식 3월) ──
+  { id:'s3-7',  sec:'s_field', text:'268개 매장 리스트 최종 확인', owner:['Ara','Chloe'], due:'2026-09-25' },
+  { id:'s3-8',  sec:'s_field', text:'방문 스케줄 편성 — 13일 내 전체 커버', owner:['Chloe'], due:'2026-10-05' },
+  { id:'s3-9',  sec:'s_field', text:'필드팀 인력(레퍼) 채용 / 배정', owner:['Ara','Chloe'], due:'2026-10-04' },
+  { id:'s3-10', sec:'s_field', text:'셀링 서포트 가이드 / 방문 체크리스트 제작', owner:['Chloe'], due:'2026-10-13' },
+  { id:'s3-11', sec:'s_field', text:'Secondary Placement 옆 진열 가이드라인 현장 전달', owner:['Ara'], due:'2026-10-13' },
+  { id:'s3-12', sec:'s_field', text:'방문 완료 트래킹 시스템 준비', owner:['Chloe'], due:'2026-10-20' },
+  { id:'s3-13', sec:'s_field', text:'필드팀 매장 방문 실행 (Wk7-9 내 13일)', owner:['Chloe'], due:'2027년 3월경' },
+  { id:'s3-14', sec:'s_field', text:'방문 결과 리포트 취합', owner:['Chloe'], due:'2027년 3월말 경' },
+  { id:'sfield-1', sec:'s_field', text:'필드팀 매니저 채용', owner:['Chloe'], due:'9/9', tag:['Jaden'] },
+  { id:'sfield-2', sec:'s_field', text:'브랜드 및 제품 확정 - pilot program (11-1월)', owner:['Ara','Chloe'], due:'2026년 10월경' },
+
+  // ── Section 3 : Q1 K-Beauty Week ──
+  { id:'s3-1', sec:'s3', grp:'Exclusive Set · Media · Mailer', text:'Exclusive Trial Kit 스토리텔링 컨셉 확정', owner:['Chloe'], due:'2026-10-01' },
+  { id:'s3-2', sec:'s3', grp:'Exclusive Set · Media · Mailer', text:'Exclusive Trial Kit 실물 제작 / 소싱', owner:['Ara'], due:'2026년 11월경' },
+  { id:'s3-3', sec:'s3', grp:'Exclusive Set · Media · Mailer', text:'Secondary Placement 코업 협의 및 확정 ($37,000)', owner:['Ara'], due:'2026-09-30' },
+  { id:'s3-4', sec:'s3', grp:'Exclusive Set · Media · Mailer', text:'UB Media (Sponsored Display) 소재 제작', owner:['Chloe'], due:'2026년 12월말경' },
+  { id:'s3-5', sec:'s3', grp:'Exclusive Set · Media · Mailer', text:'UB Media (Meta) 소재 제작', owner:['Chloe'], due:'2026년 12월말경' },
+  { id:'s3-6', sec:'s3', grp:'Exclusive Set · Media · Mailer', text:'Mailer (Full Page) 콘텐츠 제작', owner:['Ara'], due:'2026년 12월말경' },
+  { id:'s3-6b', sec:'s3', grp:'Exclusive Set · Media · Mailer', text:'Mailer / UB Media 소재 얼타 크리에이티브 승인 제출', owner:['Chloe','Ara'], due:'2027년 1월경', note:'제작과는 별개 단계 — 통상 발송/게재 4~6주 전 얼타 측 승인 필요' },
+
+  { id:'s3-15', sec:'s3', grp:'Beauty Advisor — Beauty Box', text:'Beauty Box 구성품(제품 · 샘플) 큐레이션 결정', owner:['Chloe','Ara'], due:'2026-11-01' },
+  { id:'s3-16', sec:'s3', grp:'Beauty Advisor — Beauty Box', text:'Beauty Box 물량 확보 및 포장', owner:['Ara'], due:'11/10-31' },
+  { id:'s3-17', sec:'s3', grp:'Beauty Advisor — Beauty Box', text:'발송 대상 매장(BA) 리스트 확정', owner:['Ara'], due:'2026-12-15' },
+  { id:'s3-18', sec:'s3', grp:'Beauty Advisor — Beauty Box', text:'Wk7 이전 도착 기준 발송 일정 역산 확정', owner:['Ara'], due:'2026-12-20' },
+  { id:'s3-19', sec:'s3', grp:'Beauty Advisor — Beauty Box', text:'IFS 배송 경로 확정', owner:['Ara'], due:'2026-12-20' },
+  { id:'s3-20', sec:'s3', grp:'Beauty Advisor — Beauty Box', text:'프로모션 적용 제품 사전교육 자료 제작', owner:['Chloe'], due:'2027년 1월' },
+  { id:'s3-21', sec:'s3', grp:'Beauty Advisor — Beauty Box', text:'BA 박스 수령 완료+ 필드팀 rep들이 재확인 및 유도', owner:['Chloe'], due:'2027년 3월' },
+  { id:'s3-22', sec:'s3', grp:'Beauty Advisor — Beauty Box', text:'발송 완료 확인 및 트래킹', owner:['Ara'], due:'2027년 3월경' },
+  { id:'s3-22b', sec:'s3', grp:'Beauty Advisor — Beauty Box', text:'Beauty Advisor — Beauty Box Survey 제작 및 배포', owner:['Chloe'], due:'2027년 2월경' },
+
+  { id:'s3-23', sec:'s3', grp:'코업 집행 & 아이템 셋업', text:'Billback / invoice 프로세스 확인', owner:['Ara'], due:'2026년 10월경' },
+  { id:'s3-24', sec:'s3', grp:'코업 집행 & 아이템 셋업', text:'얼타 코업 진행 소통', owner:['Ara'], due:'상시', tag:['BB'] },
+  { id:'s3-25', sec:'s3', grp:'코업 집행 & 아이템 셋업', text:'Exclusive Kit UPC/GTIN 확보 및 얼타 아이템 셋업 폼 제출', owner:['Ara'], due:'2026년 11월경', note:'통상 플로어셋 90~120일 전이 데드라인 — 늦어도 12월 중 착수 권장' },
+  { id:'s3-26', sec:'s3', grp:'코업 집행 & 아이템 셋업', text:'Exclusive Kit 제작 및 브랜드사 소통', owner:['Ara'], due:'2026년 11월경' },
+  { id:'s3-27', sec:'s3', grp:'코업 집행 & 아이템 셋업', text:'Exclusive Kit 재고 / 생산 포캐스트 확정', owner:['Ara'], due:'2026년 11월중순경', note:'Mailer 발송 시 수요 급증 대비 — 품절 방지' },
+  { id:'s3-28', sec:'s3', grp:'코업 집행 & 아이템 셋업', text:'Ulta.com 리스팅 / 재고 연동 확인', owner:['Ara'], due:'2027년 2월경', note:'Dotcom Feature 항목과 연결' },
+  { id:'s3-29', sec:'s3', grp:'코업 집행 & 아이템 셋업', text:'GWP / Exclusive Set 수량 개런티 · exclusivity 기간 서면 확정', owner:['Ara'], due:'2026년 12월경' },
+
+  { id:'s3-30', sec:'s3', grp:'Ambassador — 300+ 마이크로인플루언서', text:'앰버서더 리크루팅 및 셀렉션 기준 확정 문서화 및 공유', owner:['Wendy'], due:'2026-09-11' },
+  { id:'s3-31', sec:'s3', grp:'Ambassador — 300+ 마이크로인플루언서', text:'컴펜세이션 구조 확정 (제품 시딩 + 포스팅 성과 리워드) + 커미션 링크 확보 (Ulta 담당 Brenna)', owner:['Wendy'], due:'2026-09-16' },
+  { id:'s3-31b', sec:'s3', grp:'Ambassador — 300+ 마이크로인플루언서', text:'앰버서더 300명 확보 완료', owner:['Wendy'], due:'2026-11-01' },
+  { id:'s3-31c', sec:'s3', grp:'Ambassador — 300+ 마이크로인플루언서', text:'협업 에이전시 체결', owner:['Wendy'], due:'2026-11-01' },
+  { id:'s3-32', sec:'s3', grp:'Ambassador — 300+ 마이크로인플루언서', text:'공식 소속감 형성 및 관리 시스템 구축 (자사 웹사이트 연동)', owner:['Wendy'], due:'2026-10-15' },
+  { id:'s3-33', sec:'s3', grp:'Ambassador — 300+ 마이크로인플루언서', text:'K-Beauty Week 콘텐츠 캘린더와 앰버서더 포스팅 일정 동기화', owner:['Wendy'], due:'2026-09-11' },
+  { id:'s3-34', sec:'s3', grp:'Ambassador — 300+ 마이크로인플루언서', text:'프로모션 기간 콘텐츠 업로드 실행 및 트래킹 (커미션 링크 연동)', owner:['Wendy'], due:'상시' },
+
+  // ── Section MSR : 측정 & 성과 리포팅 ──
+  { id:'smsr-1', sec:'s_msr', text:'Baseline 판매 데이터 확보 (Ulta POS)', owner:['Chloe'], due:'2027년 1월 초', note:'계산: Q1 시작 6주 전 기준 — 데이터 수령이 지연되는 경우가 많아 여유 있게 준비 (업계 관행상 최소 3~4주, 지연 리스크 감안해 6주로 설정)' },
+  { id:'smsr-2', sec:'s_msr', text:'성공 지표(KPI) 정의 및 팀 합의', owner:['Chloe'], due:'2027년 1월 말경', note:'계산: Q1 시작 6주 전 기준 — 코업 신청서/크리에이티브 브리프에 KPI를 미리 반영해야 함' },
+  { id:'smsr-3', sec:'s_msr', text:'프로모션 기간 위클리 트래킹 체크인', owner:['Chloe'], due:'2027년 3월 (Q1 기간 중 매주)', note:'판매·재고·소셜 지표를 주간 단위로 모니터링해 이슈를 조기에 발견' },
+  { id:'smsr-4', sec:'s_msr', text:'Wrap Report 템플릿 준비', owner:['Chloe'], due:'2027년 2월 중순경', note:'계산: Q1 시작 2주 전 기준 — 종료 직후 데이터만 채워 넣을 수 있도록 사전 준비' },
+  { id:'smsr-5', sec:'s_msr', text:'실제 성과 데이터 수집 및 Wrap Report 작성', owner:['Chloe'], due:'Q1 종료 후 10영업일 이내', note:'계산: POS/Circana 데이터는 통상 1~2주 리포팅 랙(lag)이 있어 종료 직후 바로 확정 수치를 받기 어려움' },
+  { id:'smsr-6', sec:'s_msr', text:'얼타 바이어 대상 Wrap Report 제출 및 성과 리뷰 미팅', owner:['Chloe'], due:'Q1 종료 후 3주 이내', note:'계산: Wrap report 작성 완료 후 바이어 미팅 스케줄링 텀 감안 — 이 리뷰 결과가 Q2 코업 협상의 근거 자료가 됨 (Section 6과 연동)' },
+
+  // ── Section 4 : UB Collective Trip ──
+  { id:'s4-1', sec:'s4', text:'Dylan과 소통 시작 — 트립 개요/타임라인 공유받기 > Dylan 회신 대기 중', owner:['Chloe'], due:'2026-08-28', done:true },
+  { id:'s4-2', sec:'s4', text:'1차 샘플 얼타팀에 발송', owner:['Chloe'], due:'2026-09-11' },
+  { id:'s4-3', sec:'s4', text:'브랜드와 2차 수량 협의', owner:['Ara'], due:'2026년 10월경' },
+  { id:'s4-4', sec:'s4', text:'트립 전 도착 기준 배송 일정 확정', owner:['Ara'], due:'2026년 11월경' },
+  { id:'s4-5', sec:'s4', text:'이미지 에셋 사전 확보 요청 (Dylan / 얼타 측)', owner:['Chloe'], due:'2026년 12월경' },
+
+  // ── Section 5 : VIP Korea Trip ──
+  { id:'s5-1', sec:'s5', text:'Dylan과 소통 트랙 유지', owner:['Chloe'], due:'TBD' },
+  { id:'s5-2', sec:'s5', text:'메인 스폰서십 포지션 확보 협의', owner:['Chloe'], due:'TBD' },
+  { id:'s5-3', sec:'s5', text:'Visibility 극대화 방안 구체화 — 피처 위치 · 브랜딩 노출 등', owner:['Chloe'], due:'TBD' },
+
+  // ── Section 6 : Q2–Q4 반복 ──
+  { id:'s6-1', sec:'s6', text:'Q1 실행 결과 템플릿화 (플레이북 정리)', owner:['Chloe'], due:'상시' },
+  { id:'s6-2', sec:'s6', text:'Q2 프로모션 — 얼타 측 확정 캘린더 반영', owner:['Chloe'], due:'2026년 12월 말경' },
+  { id:'s6-3', sec:'s6', text:'Q3 프로모션명 얼타 측 확인 (현재 TBD)', owner:['Chloe'], due:'2027년 1월 말경' },
+  { id:'s6-4', sec:'s6', text:'Q4 프로모션명 얼타 측 확인 (현재 TBD)', owner:['Chloe'], due:'2027년 1월 말경' },
+  { id:'s6-5', sec:'s6', text:'Q2–Q4 동일 구조 반복 실행 (Field Team / BA / Media / Mailer)', owner:['Chloe'], due:'상시' },
+  { id:'s6-6', sec:'s6', text:'Q1 종료 후 공식 post-mortem 미팅 진행 + 얼타 바이어(Sasha/Josie) 및 BB 대상 정기 체크인 캐던스 수립 (월간/격주)', owner:['Chloe'], due:'Q1 종료 직후', tag:['BB'] },
+];
+
+// ══════════════════════════════════════════════
+// STORAGE
+// ══════════════════════════════════════════════
+const LS_CHECKS = 'kmu_todo_checks_v1';
+const LS_EDITS  = 'kmu_todo_edits_v1';   // { taskId: { text?, owner?, due? } }
+const LS_DATA_VERSION = 'kmu_todo_data_version';
+// "변경사항 보기" 클립보드 diff를 소스(TASKS/SECTIONS)에 반영할 때마다 이 값을 올린다.
+// 값이 바뀌면 브라우저에 남아있던 체크/편집 로컬 기록을 자동으로 비워서,
+// 이미 파일에 반영된 변경사항이 "수정된 항목"으로 다시 뜨지 않도록 한다.
+const DATA_VERSION = '2026-08-31-v8';
+
+function loadChecks() {
+  let stored; try { stored = JSON.parse(localStorage.getItem(LS_CHECKS) || '{}'); } catch(e){ stored = {}; }
+  const defaults = {};
+  TASKS.forEach(t => { if (t.done) defaults[t.id] = true; });
+  return Object.assign(defaults, stored);
+}
+function saveChecks(v) { localStorage.setItem(LS_CHECKS, JSON.stringify(v)); }
+function loadEdits() { try { return JSON.parse(localStorage.getItem(LS_EDITS) || '{}'); } catch(e){ return {}; } }
+function saveEdits(v) { localStorage.setItem(LS_EDITS, JSON.stringify(v)); }
+
+// 데이터 버전이 바뀌었으면(=Claude가 diff를 파일에 반영했으면) 로컬 체크/편집 기록을 초기화.
+(function purgeIfNewDataVersion() {
+  let storedVersion = null;
+  try { storedVersion = localStorage.getItem(LS_DATA_VERSION); } catch(e) {}
+  if (storedVersion !== DATA_VERSION) {
+    try {
+      localStorage.removeItem(LS_CHECKS);
+      localStorage.removeItem(LS_EDITS);
+      localStorage.setItem(LS_DATA_VERSION, DATA_VERSION);
+    } catch(e) {}
+  }
+})();
+
+let checks = loadChecks();
+let edits  = loadEdits();
+
+function getField(task, field) {
+  const e = edits[task.id];
+  if (e && field in e) return e[field];
+  if (field in task) return task[field];
+  if (field === 'tag') return [];
+  if (field === 'memo') return '';
+  return undefined;
+}
+function sameVal(a, b) {
+  if (Array.isArray(a) || Array.isArray(b)) return JSON.stringify(a||[]) === JSON.stringify(b||[]);
+  return a === b;
+}
+function setField(task, field, val) {
+  if (!edits[task.id]) edits[task.id] = {};
+  if (sameVal(val, task[field])) { delete edits[task.id][field]; if (Object.keys(edits[task.id]).length===0) delete edits[task.id]; }
+  else edits[task.id][field] = val;
+  saveEdits(edits);
+}
+
+// ══════════════════════════════════════════════
+// D-DAY
+// ══════════════════════════════════════════════
+function isIsoDate(s){ return /^\d{4}-\d{2}-\d{2}$/.test(s); }
+function ddayInfo(dueStr) {
+  if (!isIsoDate(dueStr)) return { label: dueStr, cls: '' };
+  const target = new Date(dueStr + 'T00:00:00');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff = Math.round((target - today) / 86400000);
+  const md = `${target.getMonth()+1}/${target.getDate()}`;
+  let ddayTxt = diff > 0 ? `D-${diff}` : (diff === 0 ? 'D-DAY' : `D+${Math.abs(diff)}`);
+  let cls = 'dday-ok';
+  if (diff <= 3) cls = 'dday-urgent';
+  else if (diff <= 10) cls = 'dday-soon';
+  return { label: `${md} (${ddayTxt})`, cls, diff };
+}
+
+// 정렬 전용 — 다양한 형식의 due 문자열을 대략적인 타임스탬프로 변환.
+// 화면 표시(label)에는 영향 없음, 그룹/섹션 내부 정렬 순서를 정하는 데만 사용.
+function dueSortValue(due) {
+  if (!due) return Infinity;
+  if (isIsoDate(due)) return new Date(due + 'T00:00:00').getTime();
+  let m = due.match(/^(\d{1,2})\/(\d{1,2})/); // "9/11", "9/4-7", "11/10-31" 등
+  if (m) {
+    const month = parseInt(m[1], 10), day = parseInt(m[2], 10);
+    const year = month >= 9 ? 2026 : 2027; // 8/31 기준 이후 첫 등장 사이클 가정
+    return new Date(year, month - 1, day).getTime();
+  }
+  m = due.match(/(\d{4})년\s*(\d{1,2})월(?:\s*(초|중순|말))?/); // "2026년 11월경", "2027년 1월 초" 등
+  if (m) {
+    const year = parseInt(m[1], 10), month = parseInt(m[2], 10);
+    const day = m[3] === '초' ? 5 : m[3] === '말' ? 25 : 15;
+    return new Date(year, month - 1, day).getTime();
+  }
+  if (/Q1\s*기간\s*중/.test(due)) return new Date(2027, 2, 10).getTime();
+  if (/Q1\s*종료\s*직후/.test(due)) return new Date(2027, 2, 23).getTime();
+  if (/Q1\s*종료\s*후\s*10영업일/.test(due)) return new Date(2027, 2, 25).getTime();
+  if (/Q1\s*종료\s*후\s*3주/.test(due)) return new Date(2027, 3, 11).getTime();
+  return Infinity; // 상시 / TBD 등 특정 날짜가 없는 항목은 맨 뒤로
+}
+
+// ══════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════
+const OWNER_CYCLE = ['Chloe','Ara','Wendy'];
+
+// render()는 리스트 뷰 + 캘린더 뷰를 항상 함께 다시 그리는 디스패처.
+// 두 뷰가 같은 TASKS/checks/edits 상태를 공유하므로, 어느 한쪽에서 체크·수정이 일어나도
+// (체크박스, 인라인 편집, 캘린더 팝업 등 무엇을 통하든) render()만 호출하면 양쪽 다 즉시 동기화된다.
+function render() {
+  renderList();
+  renderCalendar();
+}
+
+function renderList() {
+  const statusFilter = document.querySelector('#filter-status .active').dataset.v;
+  const ownerFilter  = document.querySelector('#filter-owner .active').dataset.v;
+
+  const cont = document.getElementById('sections');
+  cont.innerHTML = '';
+
+  let totalAll = 0, doneAll = 0;
+  const ownerCount = { Chloe:0, Ara:0, Wendy:0, TBD:0 };
+  const upcoming = [];
+
+  SECTIONS.forEach(sec => {
+    const rawSecTasks = TASKS.filter(t => t.sec === sec.key);
+    // 그룹(grp) 블록 순서는 원본 그대로 유지하되, 각 그룹(또는 그룹 없는 섹션) 내부는
+    // 마감일 오름차순으로 정렬. 날짜가 없는 항목(상시/TBD 등)은 그룹 맨 뒤로.
+    // branch:true(A/B 조건부 하위 태스크)는 정렬로 인해 부모 태스크와 떨어지지 않도록,
+    // 직전 non-branch 태스크와 하나의 단위로 묶어서 함께 이동시킨다.
+    const grpOrder = [];
+    rawSecTasks.forEach(t => { const g = t.grp || ''; if (!grpOrder.includes(g)) grpOrder.push(g); });
+    const units = [];
+    rawSecTasks.forEach((t, idx) => {
+      if (t.branch && units.length) units[units.length - 1].tasks.push(t);
+      else units.push({ tasks: [t], idx, grp: t.grp || '' });
+    });
+    units.sort((a, b) => {
+      const ga = grpOrder.indexOf(a.grp), gb = grpOrder.indexOf(b.grp);
+      if (ga !== gb) return ga - gb;
+      const da = dueSortValue(getField(a.tasks[0], 'due')), db = dueSortValue(getField(b.tasks[0], 'due'));
+      if (da !== db) return da - db;
+      return a.idx - b.idx;
+    });
+    const secTasks = units.flatMap(u => u.tasks);
+    const secDone = secTasks.filter(t => checks[t.id]).length;
+    const pct = secTasks.length ? Math.round(secDone/secTasks.length*100) : 0;
+    totalAll += secTasks.length; doneAll += secDone;
+
+    let lastGrp = null;
+    let rowsHtml = '';
+    let visibleCount = 0;
+    secTasks.forEach(t => {
+      const owners = getField(t,'owner'); // array; [] = TBD
+      if (owners.length === 0) ownerCount.TBD = (ownerCount.TBD||0) + 1;
+      else owners.forEach(o => { ownerCount[o] = (ownerCount[o]||0) + 1; });
+      const due = getField(t,'due');
+      const dd = ddayInfo(due);
+      if (isIsoDate(due) && !checks[t.id]) upcoming.push({ text:getField(t,'text'), diff: dd.diff, label: dd.label, cls: dd.cls, sec: sec.title });
+
+      if (statusFilter === 'todo' && checks[t.id]) return;
+      if (statusFilter === 'done' && !checks[t.id]) return;
+      if (ownerFilter !== 'all' && !owners.includes(ownerFilter)) return;
+      visibleCount++;
+
+      if (t.grp && t.grp !== lastGrp) {
+        rowsHtml += `<div class="grp-label">${t.grp}</div>`;
+        lastGrp = t.grp;
+      } else if (!t.grp) { lastGrp = null; }
+
+      const text = getField(t,'text');
+      const textEdited = edits[t.id] && ('text' in edits[t.id]) ? 'edited' : '';
+      const dueEdited = edits[t.id] && ('due' in edits[t.id]) ? 'edited' : '';
+      const branchTag = t.branchTag ? `<span class="task-branch-tag">${t.branchTag}</span>` : '';
+      const note = t.note ? `<div class="task-note">${t.note}</div>` : '';
+
+      const ownerPills = owners.length
+        ? owners.map(o => `<button class="owner-pill owner-${o}" title="클릭하면 담당자에서 제외" onclick="removeOwner(event,'${t.id}','${o}')">${o}</button>`).join('')
+        : `<button class="owner-pill owner-TBD" title="클릭하면 담당자 추가" onclick="addOwner(event,'${t.id}')">TBD</button>`;
+      const remainingOwners = OWNER_CYCLE.filter(o => !owners.includes(o));
+      const addBtn = (owners.length && remainingOwners.length)
+        ? `<button class="owner-add" title="담당자 추가" onclick="addOwner(event,'${t.id}')">+</button>` : '';
+
+      const taskTags = getField(t,'tag');
+      const tagPills = taskTags.map(g => `<span class="tag-pill tag-${g}">${g}</span>`).join('');
+
+      const hasMemo = !!getField(t,'memo');
+      const memoBtn = `<button class="memo-btn ${hasMemo?'has-memo':''}" onclick="openMemoModal(event,'${t.id}')" title="${hasMemo?'메모 보기/편집':'메모·관련 링크 추가'}">📝</button>`;
+
+      rowsHtml += `
+        <li class="${checks[t.id]?'done':''} ${t.branch?'branch':''}" data-id="${t.id}">
+          <div class="chk" onclick="toggleTask('${t.id}')">${checks[t.id]?'✓':''}</div>
+          <div class="task-main">
+            <div class="task-text ${textEdited}" data-id="${t.id}" ondblclick="editText(event,'${t.id}')">${branchTag}${text}</div>
+            ${note}
+          </div>
+          <div class="task-meta">
+            <div class="owner-group">${ownerPills}${addBtn}${tagPills}</div>
+            <span class="due-tag ${dd.cls} ${dueEdited}" ondblclick="editDue(event,'${t.id}')">${dd.label}</span>
+            ${memoBtn}
+          </div>
+        </li>`;
+    });
+
+    if (visibleCount === 0) return; // 필터 결과 없는 섹션은 숨김
+
+    const secEl = document.createElement('div');
+    secEl.className = 'section';
+    secEl.innerHTML = `
+      <div class="section-head" onclick="this.parentElement.classList.toggle('collapsed')">
+        <div class="sec-icon">${sec.icon}</div>
+        <div class="sec-titles">
+          <div class="sec-title">${sec.title} <span class="sec-badge">${sec.badge}</span></div>
+          <div class="sec-period">${sec.period}</div>
+        </div>
+        <div class="sec-progress-wrap">
+          <div class="sec-bar-track"><div class="sec-bar-fill" style="width:${pct}%"></div></div>
+          <div class="sec-pct">${secDone}/${secTasks.length}</div>
+        </div>
+        <div class="sec-chevron">▾</div>
+      </div>
+      <div class="sec-body"><ul class="tasklist">${rowsHtml}</ul></div>
+    `;
+    cont.appendChild(secEl);
+  });
+
+  // overview
+  const ovPct = totalAll ? Math.round(doneAll/totalAll*100) : 0;
+  document.getElementById('ov-total-txt').innerHTML = `${ovPct}<span>%</span>`;
+  document.getElementById('ov-total-bar').style.width = ovPct + '%';
+  document.getElementById('ov-count-txt').innerHTML = `${doneAll} <span>/ ${totalAll}</span>`;
+
+  const ownerColors = { Chloe:'#3478f6', Ara:'#8b5cf6', Wendy:'#0d8f56', TBD:'#9aa1ae' };
+  document.getElementById('ov-owner-row').innerHTML = ['Chloe','Ara','Wendy'].map(o =>
+    `<div class="ov-owner-chip"><span class="ov-owner-dot" style="background:${ownerColors[o]}"></span>${o} ${ownerCount[o]||0}건</div>`
+  ).join('');
+
+  upcoming.sort((a,b) => a.diff - b.diff);
+  const ddList = document.getElementById('ov-dday-list');
+  if (!upcoming.length) {
+    ddList.innerHTML = '<div class="ov-dday-row"><span class="ov-dday-txt">임박한 날짜 지정 항목 없음</span></div>';
+  } else {
+    ddList.innerHTML = upcoming.slice(0,3).map(u =>
+      `<div class="ov-dday-row"><span class="ov-dday-tag ${u.cls}">${u.label}</span><span class="ov-dday-txt">${u.text}</span></div>`
+    ).join('');
+  }
+}
+
+function toggleTask(id) {
+  checks[id] = !checks[id];
+  saveChecks(checks);
+  render();
+  if (_calModalRefresh) _calModalRefresh(); // 캘린더 팝업이 열려 있으면 체크 상태 반영해서 다시 그림
+}
+
+function editText(e, id) {
+  e.stopPropagation();
+  const el = e.currentTarget;
+  const task = TASKS.find(t => t.id===id);
+  const branchTag = task.branchTag ? `<span class="task-branch-tag">${task.branchTag}</span>` : '';
+  const current = getField(task,'text');
+  el.innerHTML = '';
+  const inp = document.createElement('textarea');
+  inp.className = 'edit-inline-input';
+  inp.value = current;
+  inp.rows = Math.max(1, Math.ceil(current.length/46));
+  el.appendChild(inp);
+  inp.focus(); inp.select();
+  function commit() {
+    const val = inp.value.trim() || current;
+    setField(task, 'text', val);
+    render();
+  }
+  inp.addEventListener('blur', commit);
+  inp.addEventListener('keydown', ev => { if (ev.key==='Enter' && !ev.shiftKey) { ev.preventDefault(); inp.blur(); } if (ev.key==='Escape'){ render(); } });
+}
+
+function editDue(e, id) {
+  e.stopPropagation();
+  const el = e.currentTarget;
+  const task = TASKS.find(t => t.id===id);
+  const current = getField(task,'due');
+  el.innerHTML = '';
+  const inp = document.createElement('input');
+  inp.className = 'edit-inline-input';
+  inp.style.width = '110px';
+  inp.value = current;
+  el.appendChild(inp);
+  inp.focus(); inp.select();
+  function commit() {
+    const val = inp.value.trim() || current;
+    setField(task, 'due', val);
+    render();
+  }
+  inp.addEventListener('blur', commit);
+  inp.addEventListener('keydown', ev => { if (ev.key==='Enter'){ ev.preventDefault(); inp.blur(); } if (ev.key==='Escape'){ render(); } });
+}
+
+function addOwner(e, id) {
+  e.stopPropagation();
+  const task = TASKS.find(t => t.id===id);
+  const cur = getField(task,'owner');
+  const remaining = OWNER_CYCLE.filter(o => !cur.includes(o));
+  if (!remaining.length) return;
+  setField(task, 'owner', [...cur, remaining[0]]);
+  render();
+}
+function removeOwner(e, id, name) {
+  e.stopPropagation();
+  const task = TASKS.find(t => t.id===id);
+  const cur = getField(task,'owner');
+  setField(task, 'owner', cur.filter(o => o !== name));
+  render();
+}
+// ══════════════════════════════════════════════
+// FILTERS
+// ══════════════════════════════════════════════
+document.getElementById('filter-status').addEventListener('click', e => {
+  if (!e.target.matches('.filter-btn')) return;
+  document.querySelectorAll('#filter-status .filter-btn').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  render();
+});
+document.getElementById('filter-owner').addEventListener('click', e => {
+  if (!e.target.matches('.filter-btn')) return;
+  document.querySelectorAll('#filter-owner .filter-btn').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  render();
+});
+
+// ══════════════════════════════════════════════
+// VIEW TOGGLE (리스트 뷰 ↔ 캘린더 뷰)
+// ══════════════════════════════════════════════
+document.getElementById('view-tabs').addEventListener('click', e => {
+  const btn = e.target.closest('.view-tab');
+  if (!btn) return;
+  const view = btn.dataset.view;
+  document.querySelectorAll('.view-tab').forEach(b => b.classList.toggle('active', b === btn));
+  document.getElementById('view-list').style.display = view === 'list' ? '' : 'none';
+  document.getElementById('view-calendar').style.display = view === 'calendar' ? '' : 'none';
+  render();
+});
+
+// ══════════════════════════════════════════════
+// CALENDAR VIEW
+// 리스트 뷰와 완전히 같은 TASKS/checks/edits/getField/dueSortValue를 재사용.
+// 별도 데이터 저장소를 두지 않으므로 "리스트에서 수정 → 캘린더 반영"이 항상 자동으로 보장됨.
+// ══════════════════════════════════════════════
+function hexToRgba(hex, a) {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0,2),16), g = parseInt(h.substring(2,4),16), b = parseInt(h.substring(4,6),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+// 초기 표시 월: 미완료 항목 중 가장 가까운 마감월(=dueSortValue 최솟값). 없으면 오늘이 속한 달.
+function computeDefaultCalMonth() {
+  let minTs = Infinity;
+  TASKS.forEach(t => {
+    if (checks[t.id]) return;
+    const ts = dueSortValue(getField(t,'due'));
+    if (ts < minTs) minTs = ts;
+  });
+  return minTs === Infinity ? new Date() : new Date(minTs);
+}
+let calMonth = computeDefaultCalMonth();
+let _calModalRefresh = null; // 캘린더 팝업이 열려 있을 때, 체크 토글 후 팝업 내용을 다시 그리기 위한 참조
+
+function calPrevMonth() { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth()-1, 1); renderCalendar(); }
+function calNextMonth() { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth()+1, 1); renderCalendar(); }
+
+function renderCalendar() {
+  const statusFilter = document.querySelector('#filter-status .active').dataset.v;
+  const ownerFilter  = document.querySelector('#filter-owner .active').dataset.v;
+
+  document.getElementById('cal-legend').innerHTML = SECTIONS.map(s =>
+    `<div class="cal-legend-item"><span class="cal-legend-dot" style="background:${s.color}"></span>${s.title}</div>`
+  ).join('');
+
+  const year = calMonth.getFullYear(), month = calMonth.getMonth();
+  document.getElementById('cal-month-label').textContent = `${year}년 ${month+1}월`;
+
+  // 필터를 통과한 항목만 due 근사 날짜(dueSortValue, 리스트 뷰 정렬과 동일 로직) 기준으로 날짜별로 묶는다.
+  // '상시'/'TBD' 등 특정 날짜가 없는 항목(dueSortValue === Infinity)은 그리드 밖 "날짜 미정" 목록으로 분리.
+  const dayMap = {};
+  const noDateTasks = [];
+  TASKS.forEach(t => {
+    const owners = getField(t,'owner');
+    if (statusFilter === 'todo' && checks[t.id]) return;
+    if (statusFilter === 'done' && !checks[t.id]) return;
+    if (ownerFilter !== 'all' && !owners.includes(ownerFilter)) return;
+
+    const ts = dueSortValue(getField(t,'due'));
+    if (ts === Infinity) { noDateTasks.push(t); return; }
+    const d = new Date(ts);
+    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    (dayMap[key] = dayMap[key] || []).push(t);
+  });
+
+  const firstDow = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  let cellsHtml = '';
+  for (let i=0; i<firstDow; i++) cellsHtml += `<div class="cal-cell cal-cell-empty"></div>`;
+  for (let day=1; day<=daysInMonth; day++) {
+    const key = `${year}-${month}-${day}`;
+    const dayTasks = dayMap[key] || [];
+    const isToday = year===today.getFullYear() && month===today.getMonth() && day===today.getDate();
+    const shown = dayTasks.slice(0,3);
+    const chipsHtml = shown.map(t => {
+      const sec = SECTIONS.find(s => s.key === t.sec);
+      const color = sec ? sec.color : '#9aa1ae';
+      const isDone = !!checks[t.id];
+      return `<div class="cal-chip ${isDone?'cal-chip-done':''}" style="background:${hexToRgba(color,.14)};color:${color}" onclick="openCalDetail('${t.id}')">${escHtml(getField(t,'text'))}</div>`;
+    }).join('');
+    const moreCount = dayTasks.length - shown.length;
+    const moreHtml = moreCount > 0 ? `<div class="cal-more" onclick="openCalDayList(${year},${month},${day})">+${moreCount}개 더보기</div>` : '';
+    cellsHtml += `
+      <div class="cal-cell ${isToday?'cal-cell-today':''}">
+        <div class="cal-daynum">${day}</div>
+        <div class="cal-chips">${chipsHtml}${moreHtml}</div>
+      </div>`;
+  }
+  const trailing = (7 - ((firstDow + daysInMonth) % 7)) % 7;
+  for (let i=0; i<trailing; i++) cellsHtml += `<div class="cal-cell cal-cell-empty"></div>`;
+  document.getElementById('cal-grid').innerHTML = cellsHtml;
+
+  const noDateWrap = document.getElementById('cal-nodate');
+  if (!noDateTasks.length) {
+    noDateWrap.innerHTML = '';
+  } else {
+    noDateWrap.innerHTML = `
+      <div class="cal-nodate-title">날짜 미정 · ${noDateTasks.length}건</div>
+      <div class="cal-nodate-list">
+        ${noDateTasks.map(t => {
+          const sec = SECTIONS.find(s => s.key === t.sec);
+          const color = sec ? sec.color : '#9aa1ae';
+          const isDone = !!checks[t.id];
+          return `<div class="cal-chip cal-chip-block ${isDone?'cal-chip-done':''}" style="background:${hexToRgba(color,.14)};color:${color}" onclick="openCalDetail('${t.id}')">${escHtml(getField(t,'text'))}<span class="cal-chip-due">${escHtml(getField(t,'due'))}</span></div>`;
+        }).join('')}
+      </div>`;
+  }
+}
+
+function openCalDetail(id) {
+  const t = TASKS.find(x => x.id === id);
+  if (!t) return;
+  const sec = SECTIONS.find(s => s.key === t.sec);
+  const owners = getField(t,'owner');
+  const tags = getField(t,'tag');
+  const due = getField(t,'due');
+  const isDone = !!checks[t.id];
+  document.getElementById('cal-modal-content').innerHTML = `
+    <div class="cal-modal-header">
+      <span class="cal-modal-sec-dot" style="background:${sec?sec.color:'#9aa1ae'}"></span>
+      <span class="cal-modal-sec-name">${sec?sec.title:''}</span>
+    </div>
+    <div class="cal-modal-text">${escHtml(getField(t,'text'))}</div>
+    <div class="cal-modal-row"><label class="cal-modal-check"><input type="checkbox" ${isDone?'checked':''} onchange="toggleTask('${t.id}')"> 완료 처리</label></div>
+    <div class="cal-modal-row">담당자: ${owners.length ? owners.join(', ') : 'TBD'}</div>
+    ${tags.length ? `<div class="cal-modal-row">협업 태그: ${tags.join(', ')}</div>` : ''}
+    <div class="cal-modal-row">마감일: ${escHtml(due)}</div>
+    ${getField(t,'memo') ? `<div class="cal-modal-row">📝 메모: ${linkify(getField(t,'memo'))}</div>` : ''}
+    <div class="cal-modal-actions">
+      <button class="export-close-btn" onclick="closeCalModal()">닫기</button>
+      <button class="export-copy-btn" onclick="openMemoModal(event,'${t.id}')">📝 메모 편집</button>
+    </div>
+  `;
+  _calModalRefresh = () => openCalDetail(id);
+  document.getElementById('cal-modal-overlay').classList.add('open');
+}
+
+function openCalDayList(year, month, day) {
+  const statusFilter = document.querySelector('#filter-status .active').dataset.v;
+  const ownerFilter  = document.querySelector('#filter-owner .active').dataset.v;
+  const dayTasks = TASKS.filter(t => {
+    const owners = getField(t,'owner');
+    if (statusFilter === 'todo' && checks[t.id]) return false;
+    if (statusFilter === 'done' && !checks[t.id]) return false;
+    if (ownerFilter !== 'all' && !owners.includes(ownerFilter)) return false;
+    const ts = dueSortValue(getField(t,'due'));
+    if (ts === Infinity) return false;
+    const d = new Date(ts);
+    return d.getFullYear()===year && d.getMonth()===month && d.getDate()===day;
+  });
+  document.getElementById('cal-modal-content').innerHTML = `
+    <div class="cal-modal-header"><span class="cal-modal-sec-name">${year}년 ${month+1}월 ${day}일 · ${dayTasks.length}건</span></div>
+    <div class="cal-daylist">
+      ${dayTasks.map(t => {
+        const sec = SECTIONS.find(s => s.key === t.sec);
+        const isDone = !!checks[t.id];
+        return `<div class="cal-daylist-item">
+          <label class="cal-modal-check"><input type="checkbox" ${isDone?'checked':''} onchange="toggleTask('${t.id}')"></label>
+          <span class="cal-modal-sec-dot" style="background:${sec?sec.color:'#9aa1ae'}"></span>
+          <span class="${isDone?'cal-daylist-done':''}">${escHtml(getField(t,'text'))}</span>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="cal-modal-actions"><button class="export-close-btn" onclick="closeCalModal()">닫기</button></div>
+  `;
+  _calModalRefresh = () => openCalDayList(year, month, day);
+  document.getElementById('cal-modal-overlay').classList.add('open');
+}
+
+function closeCalModal(){ document.getElementById('cal-modal-overlay').classList.remove('open'); _calModalRefresh = null; }
+function closeCalModalOnOverlay(e){ if (e.target.id==='cal-modal-overlay') closeCalModal(); }
+
+// ══════════════════════════════════════════════
+// 메모 (자유 메모 · 관련 링크)
+// text/owner/due와 동일하게 edits[id].memo에 저장 → "변경사항 보기" diff에도 함께 잡혀서
+// 클립보드 복사 → Claude 전달 → 파일 영구 반영 흐름을 그대로 탄다.
+// 목록에는 작은 아이콘(📝)만 노출하고, 클릭하면 이 팝업에서 보기/편집한다(레이아웃 안 깨짐).
+// ══════════════════════════════════════════════
+function linkify(text) {
+  if (!text) return '';
+  const escaped = escHtml(text);
+  return escaped
+    .replace(/((https?:\/\/)[^\s<]+)/g, url => `<a href="${url}" target="_blank" rel="noopener noreferrer" class="memo-link">${url}</a>`)
+    .replace(/\n/g, '<br>');
+}
+
+let _memoModalId = null;
+let _memoModalMode = 'view';
+
+function openMemoModal(e, id) {
+  if (e) e.stopPropagation();
+  _memoModalId = id;
+  const t = TASKS.find(x => x.id === id);
+  const current = t ? getField(t, 'memo') : '';
+  _memoModalMode = current ? 'view' : 'edit'; // 메모가 비어 있으면 바로 작성 모드로 시작
+  renderMemoModal();
+  document.getElementById('memo-modal-overlay').classList.add('open');
+}
+
+function renderMemoModal() {
+  const t = TASKS.find(x => x.id === _memoModalId);
+  if (!t) return;
+  const current = getField(t, 'memo');
+  const el = document.getElementById('memo-modal-content');
+  if (_memoModalMode === 'edit') {
+    el.innerHTML = `
+      <div class="cal-modal-header"><span class="cal-modal-sec-name">📝 메모 · ${escHtml(getField(t,'text'))}</span></div>
+      <textarea id="memo-edit-textarea" class="memo-textarea" placeholder="메모나 관련 링크를 입력하세요 — URL은 저장하면 자동으로 클릭 가능한 링크가 됩니다.">${escHtml(current)}</textarea>
+      <div class="cal-modal-actions">
+        <button class="export-close-btn" onclick="closeMemoModal()">취소</button>
+        <button class="export-copy-btn" onclick="saveMemoModal()">저장</button>
+      </div>`;
+    document.getElementById('memo-edit-textarea').focus();
+  } else {
+    el.innerHTML = `
+      <div class="cal-modal-header"><span class="cal-modal-sec-name">📝 메모 · ${escHtml(getField(t,'text'))}</span></div>
+      <div class="memo-view">${current ? linkify(current) : '<span class="memo-empty">작성된 메모가 없습니다.</span>'}</div>
+      <div class="cal-modal-actions">
+        <button class="export-close-btn" onclick="closeMemoModal()">닫기</button>
+        <button class="export-copy-btn" onclick="_memoModalMode='edit'; renderMemoModal();">✏️ 편집</button>
+      </div>`;
+  }
+}
+
+function saveMemoModal() {
+  const t = TASKS.find(x => x.id === _memoModalId);
+  if (!t) return;
+  const val = document.getElementById('memo-edit-textarea').value.trim();
+  if (val === '' && !t.memo) {
+    // 원래도 메모가 없었고 여전히 비어있으면 불필요한 편집 기록을 남기지 않음
+    if (edits[t.id] && ('memo' in edits[t.id])) {
+      delete edits[t.id].memo;
+      if (Object.keys(edits[t.id]).length === 0) delete edits[t.id];
+      saveEdits(edits);
+    }
+  } else {
+    setField(t, 'memo', val);
+  }
+  render();
+  if (_calModalRefresh) _calModalRefresh();
+  _memoModalMode = 'view';
+  renderMemoModal();
+}
+
+function closeMemoModal(){ document.getElementById('memo-modal-overlay').classList.remove('open'); _memoModalId = null; }
+function closeMemoModalOnOverlay(e){ if (e.target.id==='memo-modal-overlay') closeMemoModal(); }
+
+// ══════════════════════════════════════════════
+// EXPORT / CHANGE LOG
+// ══════════════════════════════════════════════
+let _exportText = '';
+function buildChangeSummary() {
+  const items = [];
+  TASKS.forEach(t => {
+    // 체크 상태가 파일의 기본값(done:true 여부)과 다를 때만 "변경"으로 취급.
+    // done:true인 태스크는 항상 체크된 채로 보이는 게 정상이므로, 그대로 두면
+    // 변경사항이 아닌데도 매번 [완료 체크]로 다시 뜨는 문제가 있었음(2026-08-31 발견/수정).
+    const isChecked = !!checks[t.id];
+    const wasDefaultChecked = !!t.done;
+    if (isChecked !== wasDefaultChecked) {
+      if (isChecked) items.push({ label: `[완료 체크] ${t.id}`, original: '미완료', newVal: getField(t,'text') });
+      else items.push({ label: `[완료 체크 해제] ${t.id}`, original: getField(t,'text'), newVal: '미완료' });
+    }
+    const e = edits[t.id];
+    if (e) {
+      if ('text' in e) items.push({ label: `[수정] ${t.id} 내용`, original: t.text, newVal: e.text });
+      if ('owner' in e) items.push({ label: `[수정] ${t.id} 담당자`, original: (t.owner.join(', ')||'TBD'), newVal: (e.owner.join(', ')||'TBD') });
+      if ('tag' in e) items.push({ label: `[수정] ${t.id} 협업 태그`, original: ((t.tag||[]).join(', ')||'없음'), newVal: (e.tag.join(', ')||'없음') });
+      if ('due' in e) items.push({ label: `[수정] ${t.id} 마감일`, original: t.due, newVal: e.due });
+      if ('memo' in e) items.push({ label: `[수정] ${t.id} 메모`, original: (t.memo || '없음'), newVal: (e.memo || '없음') });
+    }
+  });
+  return items;
+}
+
+function openExportModal() {
+  const items = buildChangeSummary();
+  const list = document.getElementById('export-list');
+  if (!items.length) {
+    list.innerHTML = '<div class="export-empty">수정된 항목이 없습니다.</div>';
+    _exportText = '수정된 항목 없음';
+  } else {
+    list.innerHTML = items.map(it => `
+      <div class="export-item">
+        <div class="export-item-label">${it.label}</div>
+        <div class="export-item-row"><span class="export-item-tag export-tag-before">이전</span><span class="export-val">${escHtml(it.original)}</span></div>
+        <div class="export-item-row" style="margin-top:4px"><span class="export-item-tag export-tag-after">이후</span><span class="export-val"><strong>${escHtml(it.newVal)}</strong></span></div>
+      </div>`).join('');
+    _exportText = items.map(it => `${it.label}\n  이전: ${it.original}\n  이후: ${it.newVal}`).join('\n\n');
+  }
+  document.getElementById('export-modal-overlay').classList.add('open');
+}
+function closeExportModal(){ document.getElementById('export-modal-overlay').classList.remove('open'); }
+function closeExportOnOverlay(e){ if (e.target.id==='export-modal-overlay') closeExportModal(); }
+function copyExportText() {
+  navigator.clipboard.writeText(_exportText).then(() => {
+    const btn = document.querySelector('.export-copy-btn');
+    btn.textContent = '✅ 복사됨!';
+    setTimeout(()=>{ btn.textContent='📋 클립보드 복사'; }, 2000);
+  });
+}
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+document.getElementById('header-date').textContent = new Date().toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' });
+render();
+</script>
+</body>
+</html>
